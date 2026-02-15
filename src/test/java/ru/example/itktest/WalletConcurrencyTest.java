@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.example.itktest.dto.WalletOperationDto;
 import ru.example.itktest.model.OperationType;
 import ru.example.itktest.model.Wallet;
@@ -27,13 +32,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Ни один запрос не должен быть не обработан (50Х error).
  */
 @SpringBootTest
+@Testcontainers
 class WalletConcurrencyTest {
-
     @Autowired
     private WalletService walletService;
-
     @Autowired
     private WalletRepository walletRepository;
+
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:15");
+
+    @DynamicPropertySource
+    static void configure(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
 
     @Test
     void concurrentDeposits_shouldHandleRaceConditions() throws Exception {

@@ -43,12 +43,4 @@ public class Wallet {
      */
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    // TODO заменить на atomic SQL update (нативный SQL, где в одном запросе производится поиск и модификация)
-    /**
-     * Версия сущности для решения race condition
-     */
-    @Version
-    private Long version;
-
 }

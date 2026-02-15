@@ -8,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.example.itktest.dto.WalletOperationDto;
 import ru.example.itktest.model.OperationType;
 import ru.example.itktest.model.Wallet;
@@ -18,11 +21,14 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 /**
  * Тестирование эндпоинтов
  */
 @SpringBootTest
+@Testcontainers
 @AutoConfigureMockMvc
 class WalletControllerTest {
     @Autowired
@@ -31,6 +37,17 @@ class WalletControllerTest {
     private WalletRepository walletRepository;
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:15");
+
+    @DynamicPropertySource
+    static void configure(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
 
     /**
      * Создание кошелька

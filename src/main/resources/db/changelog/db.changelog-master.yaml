@@ -1,3 +1,11 @@
 databaseChangeLog:
   - include:
       file: db/changelog/init.yaml
+
+  - changeSet:
+      id: 002-remove-version-column
+      author: vovabullet
+      changes:
+        - dropColumn:
+            tableName: wallets
+            columnName: version
