@@ -12,9 +12,7 @@ public class InsufficientFundsException extends RuntimeException {
         super("На счету недостаточно средств");
     }
 
-    public InsufficientFundsException(UUID walletId,
-                                      BigDecimal balance,
-                                      BigDecimal requested) {
+    public InsufficientFundsException(UUID walletId, BigDecimal balance, BigDecimal requested) {
         super("Недостаточно средств. walletId=" + walletId +
                 ", balance=" + balance +
                 ", requested=" + requested);

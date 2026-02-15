@@ -6,4 +6,8 @@ public class WalletNotFoundException extends RuntimeException {
     public WalletNotFoundException(UUID id) {
         super("Не найден кошелек с id: " + id);
     }
+    public WalletNotFoundException() {
+        super("Кошелек не найден");
+    }
+
 }

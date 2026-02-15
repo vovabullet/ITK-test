@@ -17,7 +17,9 @@ import ru.example.itktest.model.Wallet;
 import ru.example.itktest.repository.WalletRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static ru.example.itktest.model.OperationType.WITHDRAW;
 
@@ -79,7 +81,6 @@ public class WalletService {
         Wallet wallet = walletRepository.findById(id).
                 orElseThrow(() -> new WalletNotFoundException(id));
 
-        log.debug("Баланс кошелька с ID {} успешно получен", id);
         return modelMapper.map(wallet, WalletBalanceDto.class);
     }
 
@@ -95,5 +96,19 @@ public class WalletService {
         };
 
         wallet.setAmount(newAmount);
+    }
+
+    /**
+     * Получение всех кошельков
+     * @return список всех кошельков
+     */
+    @Transactional(readOnly = true)
+    public List<WalletDto> getAll() {
+        log.debug("Получение всех кошельков");
+        List<Wallet> wallets = walletRepository.findAll();
+
+        return wallets.stream().map(wallet ->
+                modelMapper.map(wallet, WalletDto.class)).
+                collect(Collectors.toList());
     }
 }
