@@ -1,5 +1,6 @@
 package ru.example.itktest.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -19,9 +20,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletOperationDto {
+    @JsonProperty("valletId") // имя поля в JSON
     @NotNull(message = "ID кошелька обязательно")
     private UUID id;
 
+    @JsonProperty("operationType")
     @NotNull(message = "Статус обязателен")
     private OperationType type;
 
