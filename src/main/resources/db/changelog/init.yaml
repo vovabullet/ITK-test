@@ -1,0 +1,30 @@
+databaseChangeLog:
+- changeSet:
+    id: 1771156600929-1
+    author: vovur (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: amount
+            type: numeric(19, 2)
+        - column:
+            name: created_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            name: updated_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            name: version
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: wallets_pkey
+            name: id
+            type: UUID
+        tableName: wallets
+
