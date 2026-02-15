@@ -1,11 +1,13 @@
 package ru.example.itktest;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -15,7 +17,6 @@ import ru.example.itktest.dto.WalletOperationDto;
 import ru.example.itktest.model.OperationType;
 import ru.example.itktest.model.Wallet;
 import ru.example.itktest.repository.WalletRepository;
-import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -124,10 +125,10 @@ class WalletControllerTest {
      */
     @Test
     void invalidJson_shouldReturn400() throws Exception {
-
+        String invalidJson = "{\"amount\":\"100\"}";
         mockMvc.perform(post("/api/v1/wallet")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{invalid json"))
+                        .content(invalidJson))
                 .andExpect(status().isBadRequest());
     }
 
