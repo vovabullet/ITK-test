@@ -1,14 +1,16 @@
 package ru.example.itktest.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
-import java.util.UUID;
+import java.math.BigDecimal;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletBalanceDto {
-    @NotNull(message = "ID кошелька обязательно")
-    private UUID id;
+    @NotNull
+    @PositiveOrZero(message = "Сумма не может быть отрицательной")
+    private BigDecimal amount;
 }

@@ -1,18 +1,15 @@
 package ru.example.itktest.service;
 
-import jakarta.persistence.OptimisticLockException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import ru.example.itktest.dto.WalletBalanceDto;
 import ru.example.itktest.dto.WalletDto;
 import ru.example.itktest.dto.WalletOperationDto;
 import ru.example.itktest.exception.InsufficientFundsException;
 import ru.example.itktest.exception.WalletNotFoundException;
-import ru.example.itktest.model.OperationType;
 import ru.example.itktest.model.Wallet;
 import ru.example.itktest.repository.WalletRepository;
 
@@ -20,8 +17,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static ru.example.itktest.model.OperationType.WITHDRAW;
 
 /**
  * Сервис для манипуляции электронным кошельком
@@ -56,15 +51,33 @@ public class WalletService {
      * @return обновленный кошелек
      */
     @Transactional
-    @Retryable(OptimisticLockException.class) // для обработки OptimisticLockException из Hibernate
     public WalletDto walletOperation(WalletOperationDto dto) {
         UUID id = dto.getId();
         log.debug("Проведение операции над кошельком с ID: {}", id);
 
-        Wallet wallet = walletRepository.findById(id).
-                orElseThrow(() -> new WalletNotFoundException(id));
+        BigDecimal amount = dto.getAmount();
+        int updated;
 
-        applyOperation(wallet, dto.getType(), dto.getAmount());
+        switch (dto.getType()) {
+            case WITHDRAW:
+                updated = walletRepository.withdraw(id, amount);
+
+                if (updated == 0) {
+                    // wallet отсутствует или недостаточно средств
+                    Wallet wallet = walletRepository.findById(id).orElseThrow(() -> new WalletNotFoundException(id));
+                    throw new InsufficientFundsException(id, wallet.getAmount(), amount);
+                }
+                break;
+            case DEPOSIT:
+                updated = walletRepository.deposit(id, dto.getAmount());
+
+                if (updated == 0) {
+                    throw new WalletNotFoundException(id);
+                }
+                break;
+        }
+
+        Wallet wallet = walletRepository.findById(id).orElseThrow(() -> new WalletNotFoundException(id));
 
         log.debug("Операция над кошельком с ID {} успешно проведена", id);
         return modelMapper.map(wallet, WalletDto.class);
@@ -82,20 +95,6 @@ public class WalletService {
                 orElseThrow(() -> new WalletNotFoundException(id));
 
         return modelMapper.map(wallet, WalletBalanceDto.class);
-    }
-
-    private void applyOperation(Wallet wallet, OperationType type, BigDecimal amount) {
-        if (type == WITHDRAW && wallet.getAmount().compareTo(amount) < 0) {
-            // Недостаточно средств на счете
-            throw new InsufficientFundsException(wallet.getId(), wallet.getAmount(), amount);
-        }
-
-        BigDecimal newAmount = switch(type) {
-            case DEPOSIT -> wallet.getAmount().add(amount);
-            case WITHDRAW -> wallet.getAmount().subtract(amount);
-        };
-
-        wallet.setAmount(newAmount);
     }
 
     /**

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 import ru.example.itktest.dto.WalletOperationDto;
 import ru.example.itktest.model.OperationType;
 import ru.example.itktest.model.Wallet;
@@ -95,6 +94,6 @@ class WalletConcurrencyTest {
 
         Wallet updated = walletRepository.findById(wallet.getId()).orElseThrow();
         // - баланс на счету = 200
-        assertEquals(new BigDecimal("200"), updated.getAmount());
+        assertEquals(new BigDecimal("200.00"), updated.getAmount());
     }
 }
